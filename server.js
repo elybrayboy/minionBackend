@@ -1,49 +1,46 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const cors = require('cors');
+
 const app = express();
-const port = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 
-const imagesDir = path.join(__dirname, 'images');
-
-// Ensure images directory exists
-if (!fs.existsSync(imagesDir)){
-    fs.mkdirSync(imagesDir);
-}
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use('/images', express.static(imagesDir));
-
-app.get('/gallery', (req, res) => {
-    fs.readdir(imagesDir, (err, files) => {
-        if (err) {
-            console.error('Failed to read the gallery directory.', err);
-            res.status(500).send('Failed to read the gallery directory.');
-        } else {
-            console.log('Files:', files); // Log files for debugging
-            res.json(files);
-        }
-    });
-});
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.static(path.join(__dirname, 'assets'))); // Adjusted path for static assets
 
 app.post('/upload', (req, res) => {
     const imgData = req.body.imgBase64;
-    const imgBuffer = Buffer.from(imgData.split(',')[1], 'base64');
+    const base64Data = imgData.replace(/^data:image\/jpeg;base64,/, "");
     const filename = `image-${Date.now()}.jpg`;
+    const filepath = path.join(__dirname, 'images', filename); // Adjusted path for images
 
-    fs.writeFile(path.join(imagesDir, filename), imgBuffer, (err) => {
+    fs.writeFile(filepath, base64Data, 'base64', (err) => {
         if (err) {
             console.error('Failed to save image:', err);
             res.status(500).send('Failed to save image.');
         } else {
-            console.log('Image saved successfully:', filename); // Log filename for debugging
-            res.send('Image saved successfully.');
+            console.log('Image saved successfully:', filename);
+            res.send({ message: 'Image saved successfully.', filename });
         }
     });
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+app.get('/gallery', (req, res) => {
+    const galleryPath = path.join(__dirname, 'images');
+    fs.readdir(galleryPath, (err, files) => {
+        if (err) {
+            console.error('Failed to read the gallery directory:', err);
+            res.status(500).send('Failed to read the gallery directory.');
+        } else {
+            const filteredFiles = files.filter(file => file !== '.DS_Store');
+            res.json(filteredFiles);
+        }
+    });
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running at http://localhost:${PORT}`);
 });
