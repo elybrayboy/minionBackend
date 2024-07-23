@@ -1,16 +1,14 @@
 {
-  "name": "giko",
+  "name": "giko-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Giko PFP backend server",
+  "main": "server.js",
   "scripts": {
-    "build": "react-scripts build",
-    "start-server": "cd assets/js && node server.js",
-    "build-and-start": "./build_and_start.sh"
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "engines": {
+    "node": ">=14.x"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2"
