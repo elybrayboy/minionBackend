@@ -6,16 +6,22 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure the images directory exists
+const imagesDir = path.join(__dirname, 'images');
+if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir);
+}
+
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'assets'))); // Adjusted path for static assets
+app.use('/images', express.static(imagesDir)); // Serve static files from "images"
 
 app.post('/upload', (req, res) => {
     const imgData = req.body.imgBase64;
     const base64Data = imgData.replace(/^data:image\/jpeg;base64,/, "");
     const filename = `image-${Date.now()}.jpg`;
-    const filepath = path.join(__dirname, 'images', filename); // Adjusted path for images
+    const filepath = path.join(imagesDir, filename);
 
     fs.writeFile(filepath, base64Data, 'base64', (err) => {
         if (err) {
@@ -29,8 +35,7 @@ app.post('/upload', (req, res) => {
 });
 
 app.get('/gallery', (req, res) => {
-    const galleryPath = path.join(__dirname, 'images');
-    fs.readdir(galleryPath, (err, files) => {
+    fs.readdir(imagesDir, (err, files) => {
         if (err) {
             console.error('Failed to read the gallery directory:', err);
             res.status(500).send('Failed to read the gallery directory.');
