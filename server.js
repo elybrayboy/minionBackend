@@ -46,7 +46,7 @@ app.get('/gallery', (req, res) => {
 // Delete image
 app.delete('/images/:filename', (req, res) => {
     const { filename } = req.params;
-    const filePath = path.join(__dirname, 'public/images', filename);
+    const filePath = path.join(__dirname, '/images', filename);
 
     fs.unlink(filePath, (err) => {
         if (err) {
