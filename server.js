@@ -43,6 +43,20 @@ app.get('/gallery', (req, res) => {
     });
 });
 
+// Delete image
+app.delete('/images/:filename', (req, res) => {
+    const { filename } = req.params;
+    const filePath = path.join(__dirname, 'public/images', filename);
+
+    fs.unlink(filePath, (err) => {
+        if (err) {
+            return res.status(500).send('File not found or already deleted');
+        }
+        res.send({ msg: 'File deleted successfully' });
+    });
+});
+
+
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
